@@ -1,0 +1,72 @@
+#. default-message: Timestamp Math
+msgid "_spec.name"
+msgstr ""
+
+#. default-message: Compare date & time columns to find difference, minimum or maximum.
+msgid "_spec.description"
+msgstr ""
+
+#. default-message: Operation
+msgid "_spec.parameters.operation.name"
+msgstr ""
+
+#. default-message: Distance
+msgid "_spec.parameters.operation.options.difference.label"
+msgstr ""
+
+#. default-message: Earliest
+msgid "_spec.parameters.operation.options.minimum.label"
+msgstr ""
+
+#. default-message: Latest
+msgid "_spec.parameters.operation.options.maximum.label"
+msgstr ""
+
+#. default-message: First timestamp
+msgid "_spec.parameters.colname1.name"
+msgstr ""
+
+#. default-message: Second timestamp
+msgid "_spec.parameters.colname2.name"
+msgstr ""
+
+#. default-message: Units
+msgid "_spec.parameters.unit.name"
+msgstr ""
+
+#. default-message: Days
+msgid "_spec.parameters.unit.options.day.label"
+msgstr ""
+
+#. default-message: Hours
+msgid "_spec.parameters.unit.options.hour.label"
+msgstr ""
+
+#. default-message: Minutes
+msgid "_spec.parameters.unit.options.minute.label"
+msgstr ""
+
+#. default-message: Seconds
+msgid "_spec.parameters.unit.options.second.label"
+msgstr ""
+
+#. default-message: Milliseconds
+msgid "_spec.parameters.unit.options.millisecond.label"
+msgstr ""
+
+#. default-message: Microseconds
+msgid "_spec.parameters.unit.options.microsecond.label"
+msgstr ""
+
+#. default-message: Nanoseconds
+msgid "_spec.parameters.unit.options.nanosecond.label"
+msgstr ""
+
+#. default-message: A day is 24 hours, regardless of daylight savings.
+msgid "_spec.parameters.units_explainer_days.name"
+msgstr ""
+
+#. default-message: Output column name
+msgid "_spec.parameters.outcolname.name"
+msgstr ""
+

@@ -1,0 +1,60 @@
+id_name: timestampmath
+name: Timestamp Math
+category: Analyze
+icon: calculator
+description: "Compare date & time columns to find difference, minimum or maximum."
+parameters:
+- id_name: operation
+  type: menu
+  name: Operation
+  default: difference
+  options:
+  - { value: difference, label: Distance }
+  - { value: minimum, label: Earliest }
+  - { value: maximum, label: Latest }
+- id_name: colnames
+  name: ''
+  type: multicolumn
+  column_types: [ datetime ]
+  visible_if:
+    id_name: operation
+    value: [ minimum, maximum ]
+- id_name: colname1
+  name: First timestamp
+  type: column
+  column_types: [ datetime ]
+  visible_if:
+    id_name: operation
+    value: [ difference ]
+- id_name: colname2
+  name: Second timestamp
+  type: column
+  column_types: [ datetime ]
+  visible_if:
+    id_name: operation
+    value: [ difference ]
+- id_name: unit
+  name: Units
+  type: menu
+  visible_if:
+    id_name: operation
+    value: [ difference ]
+  # Aliases inspired by: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html
+  default: day
+  options:
+  - { value: day, label: Days }
+  - { value: hour, label: Hours }
+  - { value: minute, label: Minutes }
+  - { value: second, label: Seconds }
+  - { value: millisecond, label: Milliseconds }
+  - { value: microsecond, label: Microseconds }
+  - { value: nanosecond, label: Nanoseconds }
+- id_name: units_explainer_days
+  type: statictext
+  name: A day is 24 hours, regardless of daylight savings.
+  visible_if:
+    id_name: unit
+    value: [ day ]
+- id_name: outcolname
+  type: string
+  name: Output column name
