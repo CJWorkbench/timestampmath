@@ -344,6 +344,66 @@ def test_difference_no_outcolname():
     )
 
 
+def test_difference_no_chunks():
+    assert_result_equals(
+        render(
+            pa.table(
+                {
+                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
+                }
+            ),
+            P(
+                operation="difference",
+                colname1="A",
+                colname2="B",
+                unit="day",
+                outcolname="C",
+            ),
+        ),
+        (
+            pa.table(
+                {
+                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "C": pa.chunked_array([], pa.float64()),
+                }
+            ),
+            [],
+        ),
+    )
+
+
+def test_difference_no_chunks_nanoseconds():
+    assert_result_equals(
+        render(
+            pa.table(
+                {
+                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
+                }
+            ),
+            P(
+                operation="difference",
+                colname1="A",
+                colname2="B",
+                unit="nanosecond",
+                outcolname="C",
+            ),
+        ),
+        (
+            pa.table(
+                {
+                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "C": pa.chunked_array([], pa.int64()),
+                }
+            ),
+            [],
+        ),
+    )
+
+
 def test_difference_days():
     assert_result_equals(
         render(

@@ -53,6 +53,10 @@ def _render_difference(arrow_table, colname1, colname2, unit, outcolname):
         return arrow_table, []
 
     out_arrays = []
+    if unit == "nanosecond":
+        out_type = pa.int64()
+    else:
+        out_type = pa.float64()
     num_chunks = arrow_table[colname1].num_chunks
     for chunk in range(num_chunks):
         in_np_array1 = arrow_table[colname1].chunk(chunk).to_numpy(zero_copy_only=False)
@@ -77,7 +81,7 @@ def _render_difference(arrow_table, colname1, colname2, unit, outcolname):
         )
 
     return (
-        arrow_table.append_column(outcolname, pa.chunked_array(out_arrays)),
+        arrow_table.append_column(outcolname, pa.chunked_array(out_arrays, out_type)),
         [],
     )
 

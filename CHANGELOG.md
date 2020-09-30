@@ -1,3 +1,8 @@
+2020-09-30.01
+-------------
+
+* Fix error calculating difference in zero-row tables.
+
 2020-09-29.01
 -------------
 
