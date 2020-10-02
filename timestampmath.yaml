@@ -15,21 +15,21 @@ parameters:
 - id_name: colnames
   name: ''
   type: multicolumn
-  column_types: [ datetime ]
+  column_types: [ timestamp ]
   visible_if:
     id_name: operation
     value: [ minimum, maximum ]
 - id_name: colname1
   name: First timestamp
   type: column
-  column_types: [ datetime ]
+  column_types: [ timestamp ]
   visible_if:
     id_name: operation
     value: [ difference ]
 - id_name: colname2
   name: Second timestamp
   type: column
-  column_types: [ datetime ]
+  column_types: [ timestamp ]
   visible_if:
     id_name: operation
     value: [ difference ]
