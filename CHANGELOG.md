@@ -1,3 +1,8 @@
+2021-05-05.01
+-------------
+
+* Add "startof" for rounding hour/minute/second/millisecond/microsecond.
+
 2020-10-02.01
 -------------
 

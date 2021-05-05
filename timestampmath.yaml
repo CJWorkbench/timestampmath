@@ -12,13 +12,14 @@ parameters:
   - { value: difference, label: Distance }
   - { value: minimum, label: Earliest }
   - { value: maximum, label: Latest }
+  - { value: startof, label: Round down }
 - id_name: colnames
   name: ''
   type: multicolumn
   column_types: [ timestamp ]
   visible_if:
     id_name: operation
-    value: [ minimum, maximum ]
+    value: [ minimum, maximum, startof ]
 - id_name: colname1
   name: First timestamp
   type: column
@@ -39,7 +40,6 @@ parameters:
   visible_if:
     id_name: operation
     value: [ difference ]
-  # Aliases inspired by: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Timedelta.html
   default: day
   options:
   - { value: day, label: Days }
@@ -55,6 +55,22 @@ parameters:
   visible_if:
     id_name: unit
     value: [ day ]
+- id_name: roundunit
+  name: Units
+  type: menu
+  visible_if:
+    id_name: operation
+    value: [ startof ]
+  default: hour
+  options:
+  - { value: hour, label: Hour }
+  - { value: minute, label: Minute }
+  - { value: second, label: Second }
+  - { value: millisecond, label: Millisecond }
+  - { value: microsecond, label: Microsecond }
 - id_name: outcolname
   type: string
   name: Output column name
+  visible_if:
+    id_name: operation
+    value: [ difference, minimum, maximum ]

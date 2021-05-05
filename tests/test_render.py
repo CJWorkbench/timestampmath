@@ -1,79 +1,26 @@
-import contextlib
-import tempfile
 from datetime import datetime as dt
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 import pyarrow as pa
+from cjwmodule.arrow.testing import assert_result_equals, make_column, make_table
+from cjwmodule.arrow.types import ArrowRenderResult
+from cjwmodule.spec.testing import param_factory
+from cjwmodule.testing.i18n import i18n_message
+from cjwmodule.types import RenderError
 
-import timestampmath
+from timestampmath import render_arrow_v1 as render
 
-DefaultParams = {
-    "operation": "difference",
-    "colnames": [],
-    "colname1": None,
-    "colname2": None,
-    "unit": "day",
-    "outcolname": "",
-}
-
-
-def P(**params):
-    for p in params.keys():
-        assert p in DefaultParams
-    return {**DefaultParams, **params}
-
-
-def assert_arrow_table_equals(actual, expected):
-    assert actual.column_names == expected.column_names
-    assert [c.type for c in actual.columns] == [c.type for c in expected.columns]
-    import pandas  # for to_pylist() to handle ns-precision timestamps
-
-    assert actual.to_pydict() == expected.to_pydict()
-
-
-def assert_result_equals(actual, expected):
-    actual_table, actual_errors = actual
-    expected_table, expected_errors = expected
-    assert actual_errors == expected_errors
-    if expected_table is None:
-        assert actual_table is None
-    else:
-        assert actual_table is not None
-        assert_arrow_table_equals(actual_table, expected_table)
-
-
-@contextlib.contextmanager
-def tempfile_context(**kwargs):
-    with tempfile.NamedTemporaryFile(**kwargs) as tf:
-        yield Path(tf.name)
-
-
-def render(
-    table: pa.Table, params: Dict[str, Any], **kwargs
-) -> Tuple[pa.Table, List[Dict[str, Any]]]:
-    with tempfile_context(suffix=".arrow") as output_path:
-        errors = timestampmath.render(table, params, output_path, **kwargs)
-        if output_path.stat().st_size == 0:
-            return None, errors
-        else:
-            with pa.ipc.open_file(output_path) as reader:
-                return reader.read_all(), errors
+P = param_factory(Path(__file__).parent.parent / "timestampmath.yaml")
 
 
 def test_maximum_no_colnames():
     assert_result_equals(
         render(
-            pa.table({"A": pa.array([1, 2, 3], pa.timestamp(unit="ns"))}),
+            make_table(make_column("A", [1, 2, 3], pa.timestamp(unit="ns"))),
             P(operation="maximum", colnames=[], outcolname="B"),
         ),
-        (
-            pa.table(
-                {
-                    "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                }
-            ),
-            [],
+        ArrowRenderResult(
+            make_table(make_column("A", [1, 2, 3], pa.timestamp(unit="ns"))),
         ),
     )
 
@@ -84,13 +31,12 @@ def test_maximum_no_outcolname():
             pa.table({"A": pa.array([1, 2, 3], pa.timestamp(unit="ns"))}),
             P(operation="maximum", colnames=["A"], outcolname=""),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -101,14 +47,13 @@ def test_maximum_one_colname():
             pa.table({"A": pa.array([1, 2, 3], pa.timestamp(unit="ns"))}),
             P(operation="maximum", colnames=["A"], outcolname="B"),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
                     "B": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -125,7 +70,7 @@ def test_maximum_multiple_colnames():
             ),
             P(operation="maximum", colnames=["A", "B", "C"], outcolname="D"),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
@@ -134,7 +79,6 @@ def test_maximum_multiple_colnames():
                     "D": pa.array([3, 3, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -150,14 +94,13 @@ def test_maximum_reuse_outcolname():
             ),
             P(operation="maximum", colnames=["A", "B"], outcolname="A"),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "B": pa.array([2, 3, 1], pa.timestamp(unit="ns")),
                     "A": pa.array([2, 3, 3], pa.timestamp(unit="ns")),  # added to end
                 }
             ),
-            [],
         ),
     )
 
@@ -168,14 +111,13 @@ def test_maximum_zero_chunks():
             pa.table({"A": pa.array([], pa.timestamp(unit="ns"))}),
             P(operation="maximum", colnames=["A"], outcolname="B"),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([], pa.timestamp(unit="ns")),
                     "B": pa.array([], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -191,7 +133,7 @@ def test_maximum_nulls():
             ),
             P(operation="maximum", colnames=["A", "B"], outcolname="C"),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, None, 3, None], pa.timestamp(unit="ns")),
@@ -199,7 +141,6 @@ def test_maximum_nulls():
                     "C": pa.array([2, 3, 3, None], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -215,7 +156,7 @@ def test_minimum():
             ),
             P(operation="minimum", colnames=["A", "B"], outcolname="C"),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, None, 3, None], pa.timestamp(unit="ns")),
@@ -223,7 +164,6 @@ def test_minimum():
                     "C": pa.array([1, 3, 3, None], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -245,14 +185,13 @@ def test_difference_no_colnames():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2], pa.timestamp(unit="ns")),
                     "B": pa.array([2, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -274,14 +213,13 @@ def test_difference_no_colname1():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2], pa.timestamp(unit="ns")),
                     "B": pa.array([2, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -303,14 +241,13 @@ def test_difference_no_colname2():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2], pa.timestamp(unit="ns")),
                     "B": pa.array([2, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -332,14 +269,13 @@ def test_difference_no_outcolname():
                 outcolname="",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([1, 2], pa.timestamp(unit="ns")),
                     "B": pa.array([2, 3], pa.timestamp(unit="ns")),
                 }
             ),
-            [],
         ),
     )
 
@@ -361,7 +297,7 @@ def test_difference_no_chunks():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.chunked_array([], pa.timestamp(unit="ns")),
@@ -369,7 +305,6 @@ def test_difference_no_chunks():
                     "C": pa.chunked_array([], pa.float64()),
                 }
             ),
-            [],
         ),
     )
 
@@ -391,7 +326,7 @@ def test_difference_no_chunks_nanoseconds():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.chunked_array([], pa.timestamp(unit="ns")),
@@ -399,7 +334,6 @@ def test_difference_no_chunks_nanoseconds():
                     "C": pa.chunked_array([], pa.int64()),
                 }
             ),
-            [],
         ),
     )
 
@@ -425,7 +359,7 @@ def test_difference_days():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array(
@@ -437,7 +371,6 @@ def test_difference_days():
                     "C": pa.array([365.0, -60.0]),
                 }
             ),
-            [],
         ),
     )
 
@@ -463,7 +396,7 @@ def test_difference_reuse_outcolname():
                 outcolname="A",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "B": pa.array(
@@ -472,7 +405,6 @@ def test_difference_reuse_outcolname():
                     "A": pa.array([365.0, -60.0]),  # appended to table
                 }
             ),
-            [],
         ),
     )
 
@@ -500,7 +432,7 @@ def test_difference_fractional():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array(
@@ -514,7 +446,6 @@ def test_difference_fractional():
                     "C": pa.array([365.5, -59.96875]),
                 }
             ),
-            [],
         ),
     )
 
@@ -542,7 +473,7 @@ def test_difference_seconds():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array(
@@ -556,7 +487,6 @@ def test_difference_seconds():
                     "C": pa.array([31500123.0, -5209138.0]),
                 }
             ),
-            [],
         ),
     )
 
@@ -582,7 +512,7 @@ def test_difference_nulls():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array(
@@ -594,7 +524,6 @@ def test_difference_nulls():
                     "C": pa.array([None, None, None], pa.float64()),
                 }
             ),
-            [],
         ),
     )
 
@@ -622,7 +551,7 @@ def test_difference_nanoseconds():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array(
@@ -636,7 +565,6 @@ def test_difference_nanoseconds():
                     "C": pa.array([999999899980, 80199990020006, None, None]),
                 }
             ),
-            [],
         ),
     )
 
@@ -658,7 +586,7 @@ def test_difference_nanoseconds_null():
                 outcolname="C",
             ),
         ),
-        (
+        ArrowRenderResult(
             pa.table(
                 {
                     "A": pa.array([123, None, None], pa.timestamp("ns")),
@@ -666,6 +594,61 @@ def test_difference_nanoseconds_null():
                     "C": pa.array([None, None, None], pa.int64()),
                 }
             ),
-            [],
+        ),
+    )
+
+
+def test_startof_hour():
+    assert_result_equals(
+        render(
+            make_table(
+                make_column(
+                    "A",
+                    [
+                        dt(2021, 5, 5, 13, 1, 22, 321231),
+                        dt(1800, 1, 1, 1, 2, 3, 4),
+                        None,
+                    ],
+                )
+            ),
+            P(operation="startof", colnames=["A"], roundunit="hour"),
+        ),
+        ArrowRenderResult(
+            make_table(make_column("A", [dt(2021, 5, 5, 13), dt(1800, 1, 1, 1), None]))
+        ),
+    )
+
+
+def test_startof_out_of_bounds():
+    result = render(
+        make_table(
+            make_column(
+                "A",
+                [dt(1970, 1, 1), dt(1677, 9, 21, 0, 12, 43, 145500)],
+            )
+        ),
+        P(operation="startof", colnames=["A"], roundunit="minute"),
+    )
+    print(repr(result.table["A"]))
+    assert_result_equals(
+        render(
+            make_table(
+                make_column(
+                    "A",
+                    [dt(1970, 1, 1), dt(1677, 9, 21, 0, 12, 43, 145500)],
+                )
+            ),
+            P(operation="startof", colnames=["A"], roundunit="minute"),
+        ),
+        ArrowRenderResult(
+            make_table(make_column("A", [dt(1970, 1, 1), None])),
+            [
+                RenderError(
+                    i18n_message(
+                        "warning.convertedOutOfBoundsToNull",
+                        {"timestamp": "1677-09-21T00:12Z"},
+                    )
+                )
+            ],
         ),
     )

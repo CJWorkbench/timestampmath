@@ -22,6 +22,10 @@ msgstr ""
 msgid "_spec.parameters.operation.options.maximum.label"
 msgstr ""
 
+#. default-message: Round down
+msgid "_spec.parameters.operation.options.startof.label"
+msgstr ""
+
 #. default-message: First timestamp
 msgid "_spec.parameters.colname1.name"
 msgstr ""
@@ -66,7 +70,36 @@ msgstr ""
 msgid "_spec.parameters.units_explainer_days.name"
 msgstr ""
 
+#. default-message: Units
+msgid "_spec.parameters.roundunit.name"
+msgstr ""
+
+#. default-message: Hour
+msgid "_spec.parameters.roundunit.options.hour.label"
+msgstr ""
+
+#. default-message: Minute
+msgid "_spec.parameters.roundunit.options.minute.label"
+msgstr ""
+
+#. default-message: Second
+msgid "_spec.parameters.roundunit.options.second.label"
+msgstr ""
+
+#. default-message: Millisecond
+msgid "_spec.parameters.roundunit.options.millisecond.label"
+msgstr ""
+
+#. default-message: Microsecond
+msgid "_spec.parameters.roundunit.options.microsecond.label"
+msgstr ""
+
 #. default-message: Output column name
 msgid "_spec.parameters.outcolname.name"
+msgstr ""
+
+#. default-message: Converted timestamp {timestamp} to null because it is out of bounds.
+#: timestampmath.py:171
+msgid "warning.convertedOutOfBoundsToNull"
 msgstr ""
 
