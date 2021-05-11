@@ -2,7 +2,7 @@ id_name: timestampmath
 name: Timestamp math
 category: Analyze
 icon: calculator
-description: "Round Timestamps columns, or the difference, minimum or maximum between columns."
+description: "Round down Timestamps, or compare values to find the difference, minimum or maximum."
 parameters:
 - id_name: operation
   type: menu
