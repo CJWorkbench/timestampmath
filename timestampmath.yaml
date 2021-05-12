@@ -1,8 +1,9 @@
 id_name: timestampmath
-name: Timestamp Math
+name: Timestamp math
 category: Analyze
+help_url: articles/5222627
 icon: calculator
-description: "Compare date & time columns to find difference, minimum or maximum."
+description: "Round down Timestamps, or compare values to find the difference, minimum or maximum."
 parameters:
 - id_name: operation
   type: menu
