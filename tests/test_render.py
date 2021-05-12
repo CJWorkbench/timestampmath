@@ -28,15 +28,11 @@ def test_maximum_no_colnames():
 def test_maximum_no_outcolname():
     assert_result_equals(
         render(
-            pa.table({"A": pa.array([1, 2, 3], pa.timestamp(unit="ns"))}),
+            make_table(make_column("A", [1, 2, 3], pa.timestamp(unit="ns"))),
             P(operation="maximum", colnames=["A"], outcolname=""),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                }
-            ),
+            make_table(make_column("A", [1, 2, 3], pa.timestamp(unit="ns")))
         ),
     )
 
@@ -44,15 +40,13 @@ def test_maximum_no_outcolname():
 def test_maximum_one_colname():
     assert_result_equals(
         render(
-            pa.table({"A": pa.array([1, 2, 3], pa.timestamp(unit="ns"))}),
+            make_table(make_column("A", [1, 2, 3], pa.timestamp(unit="ns"))),
             P(operation="maximum", colnames=["A"], outcolname="B"),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                    "B": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2, 3], pa.timestamp(unit="ns")),
+                make_column("B", [1, 2, 3], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -61,23 +55,19 @@ def test_maximum_one_colname():
 def test_maximum_multiple_colnames():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, 1], pa.timestamp(unit="ns")),
-                    "C": pa.array([3, 1, 2], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2, 3], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, 1], pa.timestamp(unit="ns")),
+                make_column("C", [3, 1, 2], pa.timestamp(unit="ns")),
             ),
             P(operation="maximum", colnames=["A", "B", "C"], outcolname="D"),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, 1], pa.timestamp(unit="ns")),
-                    "C": pa.array([3, 1, 2], pa.timestamp(unit="ns")),
-                    "D": pa.array([3, 3, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2, 3], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, 1], pa.timestamp(unit="ns")),
+                make_column("C", [3, 1, 2], pa.timestamp(unit="ns")),
+                make_column("D", [3, 3, 3], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -86,20 +76,16 @@ def test_maximum_multiple_colnames():
 def test_maximum_reuse_outcolname():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, 2, 3], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, 1], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2, 3], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, 1], pa.timestamp(unit="ns")),
             ),
             P(operation="maximum", colnames=["A", "B"], outcolname="A"),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "B": pa.array([2, 3, 1], pa.timestamp(unit="ns")),
-                    "A": pa.array([2, 3, 3], pa.timestamp(unit="ns")),  # added to end
-                }
+            make_table(
+                make_column("B", [2, 3, 1], pa.timestamp(unit="ns")),
+                make_column("A", [2, 3, 3], pa.timestamp(unit="ns")),  # added to end
             ),
         ),
     )
@@ -108,14 +94,14 @@ def test_maximum_reuse_outcolname():
 def test_maximum_zero_chunks():
     assert_result_equals(
         render(
-            pa.table({"A": pa.array([], pa.timestamp(unit="ns"))}),
+            pa.table({"A": pa.chunked_array([], pa.timestamp(unit="ns"))}),
             P(operation="maximum", colnames=["A"], outcolname="B"),
         ),
         ArrowRenderResult(
             pa.table(
                 {
-                    "A": pa.array([], pa.timestamp(unit="ns")),
-                    "B": pa.array([], pa.timestamp(unit="ns")),
+                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
+                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
                 }
             ),
         ),
@@ -125,21 +111,17 @@ def test_maximum_zero_chunks():
 def test_maximum_nulls():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, None, 3, None], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, None, None], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, None, 3, None], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, None, None], pa.timestamp(unit="ns")),
             ),
             P(operation="maximum", colnames=["A", "B"], outcolname="C"),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, None, 3, None], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, None, None], pa.timestamp(unit="ns")),
-                    "C": pa.array([2, 3, 3, None], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, None, 3, None], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, None, None], pa.timestamp(unit="ns")),
+                make_column("C", [2, 3, 3, None], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -148,21 +130,17 @@ def test_maximum_nulls():
 def test_minimum():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, None, 3, None], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, None, None], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, None, 3, None], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, None, None], pa.timestamp(unit="ns")),
             ),
             P(operation="minimum", colnames=["A", "B"], outcolname="C"),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, None, 3, None], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3, None, None], pa.timestamp(unit="ns")),
-                    "C": pa.array([1, 3, 3, None], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, None, 3, None], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3, None, None], pa.timestamp(unit="ns")),
+                make_column("C", [1, 3, 3, None], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -171,11 +149,9 @@ def test_minimum():
 def test_difference_no_colnames():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
             P(
                 operation="difference",
@@ -186,11 +162,9 @@ def test_difference_no_colnames():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -199,11 +173,9 @@ def test_difference_no_colnames():
 def test_difference_no_colname1():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
             P(
                 operation="difference",
@@ -214,11 +186,9 @@ def test_difference_no_colname1():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -227,11 +197,9 @@ def test_difference_no_colname1():
 def test_difference_no_colname2():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
             P(
                 operation="difference",
@@ -242,11 +210,9 @@ def test_difference_no_colname2():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -255,11 +221,9 @@ def test_difference_no_colname2():
 def test_difference_no_outcolname():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
             P(
                 operation="difference",
@@ -270,11 +234,9 @@ def test_difference_no_outcolname():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([1, 2], pa.timestamp(unit="ns")),
-                    "B": pa.array([2, 3], pa.timestamp(unit="ns")),
-                }
+            make_table(
+                make_column("A", [1, 2], pa.timestamp(unit="ns")),
+                make_column("B", [2, 3], pa.timestamp(unit="ns")),
             ),
         ),
     )
@@ -299,11 +261,18 @@ def test_difference_no_chunks():
         ),
         ArrowRenderResult(
             pa.table(
-                {
-                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
-                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
-                    "C": pa.chunked_array([], pa.float64()),
-                }
+                [
+                    pa.chunked_array([], pa.timestamp(unit="ns")),
+                    pa.chunked_array([], pa.timestamp(unit="ns")),
+                    pa.chunked_array([], pa.float64()),
+                ],
+                schema=pa.schema(
+                    [
+                        pa.field("A", pa.timestamp(unit="ns")),
+                        pa.field("B", pa.timestamp(unit="ns")),
+                        pa.field("C", pa.float64(), metadata={"format": "{:,}"}),
+                    ]
+                ),
             ),
         ),
     )
@@ -328,11 +297,18 @@ def test_difference_no_chunks_nanoseconds():
         ),
         ArrowRenderResult(
             pa.table(
-                {
-                    "A": pa.chunked_array([], pa.timestamp(unit="ns")),
-                    "B": pa.chunked_array([], pa.timestamp(unit="ns")),
-                    "C": pa.chunked_array([], pa.int64()),
-                }
+                [
+                    pa.chunked_array([], pa.timestamp(unit="ns")),
+                    pa.chunked_array([], pa.timestamp(unit="ns")),
+                    pa.chunked_array([], pa.int64()),
+                ],
+                schema=pa.schema(
+                    [
+                        pa.field("A", pa.timestamp(unit="ns")),
+                        pa.field("B", pa.timestamp(unit="ns")),
+                        pa.field("C", pa.int64(), metadata={"format": "{:,d}"}),
+                    ]
+                ),
             ),
         ),
     )
@@ -341,15 +317,9 @@ def test_difference_no_chunks_nanoseconds():
 def test_difference_days():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1), dt(2020, 3, 2)], pa.timestamp(unit="ns")
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1), dt(2020, 1, 2)], pa.timestamp(unit="ns")
-                    ),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1), dt(2020, 3, 2)]),
+                make_column("B", [dt(2020, 1, 1), dt(2020, 1, 2)]),
             ),
             P(
                 operation="difference",
@@ -360,16 +330,10 @@ def test_difference_days():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1), dt(2020, 3, 2)], pa.timestamp(unit="ns")
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1), dt(2020, 1, 2)], pa.timestamp(unit="ns")
-                    ),
-                    "C": pa.array([365.0, -60.0]),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1), dt(2020, 3, 2)]),
+                make_column("B", [dt(2020, 1, 1), dt(2020, 1, 2)]),
+                make_column("C", [365.0, -60.0]),
             ),
         ),
     )
@@ -378,15 +342,9 @@ def test_difference_days():
 def test_difference_reuse_outcolname():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1), dt(2020, 3, 2)], pa.timestamp(unit="ns")
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1), dt(2020, 1, 2)], pa.timestamp(unit="ns")
-                    ),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1), dt(2020, 3, 2)]),
+                make_column("B", [dt(2020, 1, 1), dt(2020, 1, 2)]),
             ),
             P(
                 operation="difference",
@@ -397,13 +355,9 @@ def test_difference_reuse_outcolname():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "B": pa.array(
-                        [dt(2020, 1, 1), dt(2020, 1, 2)], pa.timestamp(unit="ns")
-                    ),
-                    "A": pa.array([365.0, -60.0]),  # appended to table
-                }
+            make_table(
+                make_column("B", [dt(2020, 1, 1), dt(2020, 1, 2)]),
+                make_column("A", [365.0, -60.0]),  # appended to table
             ),
         ),
     )
@@ -412,17 +366,9 @@ def test_difference_reuse_outcolname():
 def test_difference_fractional():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1, 0), dt(2020, 3, 2, 0, 0)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1, 12), dt(2020, 1, 2, 0, 45)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1, 0), dt(2020, 3, 2, 0, 0)]),
+                make_column("B", [dt(2020, 1, 1, 12), dt(2020, 1, 2, 0, 45)]),
             ),
             P(
                 operation="difference",
@@ -433,18 +379,10 @@ def test_difference_fractional():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1, 0), dt(2020, 3, 2, 0, 0)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1, 12), dt(2020, 1, 2, 0, 45)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                    "C": pa.array([365.5, -59.96875]),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1, 0), dt(2020, 3, 2, 0, 0)]),
+                make_column("B", [dt(2020, 1, 1, 12), dt(2020, 1, 2, 0, 45)]),
+                make_column("C", [365.5, -59.96875]),
             ),
         ),
     )
@@ -453,17 +391,9 @@ def test_difference_fractional():
 def test_difference_seconds():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1, 12, 1, 1), dt(2020, 3, 2, 8, 1, 1)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1, 2, 3, 4), dt(2020, 1, 2, 1, 2, 3)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1, 12, 1, 1), dt(2020, 3, 2, 8, 1, 1)]),
+                make_column("B", [dt(2020, 1, 1, 2, 3, 4), dt(2020, 1, 2, 1, 2, 3)]),
             ),
             P(
                 operation="difference",
@@ -474,18 +404,10 @@ def test_difference_seconds():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [dt(2019, 1, 1, 12, 1, 1), dt(2020, 3, 2, 8, 1, 1)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1, 2, 3, 4), dt(2020, 1, 2, 1, 2, 3)],
-                        pa.timestamp(unit="ns"),
-                    ),
-                    "C": pa.array([31500123.0, -5209138.0]),
-                }
+            make_table(
+                make_column("A", [dt(2019, 1, 1, 12, 1, 1), dt(2020, 3, 2, 8, 1, 1)]),
+                make_column("B", [dt(2020, 1, 1, 2, 3, 4), dt(2020, 1, 2, 1, 2, 3)]),
+                make_column("C", [31500123.0, -5209138.0]),
             ),
         ),
     )
@@ -494,15 +416,9 @@ def test_difference_seconds():
 def test_difference_nulls():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [None, dt(2020, 3, 2), None], pa.timestamp(unit="ns")
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1), None, None], pa.timestamp(unit="ns")
-                    ),
-                }
+            make_table(
+                make_column("A", [None, dt(2020, 3, 2), None]),
+                make_column("B", [dt(2020, 1, 1), None, None]),
             ),
             P(
                 operation="difference",
@@ -513,16 +429,10 @@ def test_difference_nulls():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [None, dt(2020, 3, 2), None], pa.timestamp(unit="ns")
-                    ),
-                    "B": pa.array(
-                        [dt(2020, 1, 1), None, None], pa.timestamp(unit="ns")
-                    ),
-                    "C": pa.array([None, None, None], pa.float64()),
-                }
+            make_table(
+                make_column("A", [None, dt(2020, 3, 2), None]),
+                make_column("B", [dt(2020, 1, 1), None, None]),
+                make_column("C", [None, None, None], pa.float64()),
             ),
         ),
     )
@@ -531,17 +441,11 @@ def test_difference_nulls():
 def test_difference_nanoseconds():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [1237342345234234234, 1230000034123123423, None, None],
-                        pa.timestamp("ns"),
-                    ),
-                    "B": pa.array(
-                        [1237343345234134214, 1230080234113143429, 123, None],
-                        pa.timestamp("ns"),
-                    ),
-                }
+            make_table(
+                make_column(
+                    "A", [1237342345234234234, 1230000034123123423, None, None]
+                ),
+                make_column("B", [1237343345234134214, 1230080234113143429, 123, None]),
             ),
             P(
                 operation="difference",
@@ -552,18 +456,14 @@ def test_difference_nanoseconds():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array(
-                        [1237342345234234234, 1230000034123123423, None, None],
-                        pa.timestamp("ns"),
-                    ),
-                    "B": pa.array(
-                        [1237343345234134214, 1230080234113143429, 123, None],
-                        pa.timestamp("ns"),
-                    ),
-                    "C": pa.array([999999899980, 80199990020006, None, None]),
-                }
+            make_table(
+                make_column(
+                    "A", [1237342345234234234, 1230000034123123423, None, None]
+                ),
+                make_column("B", [1237343345234134214, 1230080234113143429, 123, None]),
+                make_column(
+                    "C", [999999899980, 80199990020006, None, None], format="{:,d}"
+                ),
             ),
         ),
     )
@@ -572,11 +472,9 @@ def test_difference_nanoseconds():
 def test_difference_nanoseconds_null():
     assert_result_equals(
         render(
-            pa.table(
-                {
-                    "A": pa.array([123, None, None], pa.timestamp("ns")),
-                    "B": pa.array([None, 123, None], pa.timestamp("ns")),
-                }
+            make_table(
+                make_column("A", [123, None, None], pa.timestamp("ns")),
+                make_column("B", [None, 123, None], pa.timestamp("ns")),
             ),
             P(
                 operation="difference",
@@ -587,12 +485,10 @@ def test_difference_nanoseconds_null():
             ),
         ),
         ArrowRenderResult(
-            pa.table(
-                {
-                    "A": pa.array([123, None, None], pa.timestamp("ns")),
-                    "B": pa.array([None, 123, None], pa.timestamp("ns")),
-                    "C": pa.array([None, None, None], pa.int64()),
-                }
+            make_table(
+                make_column("A", [123, None, None], pa.timestamp("ns")),
+                make_column("B", [None, 123, None], pa.timestamp("ns")),
+                make_column("C", [None, None, None], pa.int64(), format="{:,d}"),
             ),
         ),
     )
@@ -620,16 +516,6 @@ def test_startof_hour():
 
 
 def test_startof_out_of_bounds():
-    result = render(
-        make_table(
-            make_column(
-                "A",
-                [dt(1970, 1, 1), dt(1677, 9, 21, 0, 12, 43, 145500)],
-            )
-        ),
-        P(operation="startof", colnames=["A"], roundunit="minute"),
-    )
-    print(repr(result.table["A"]))
     assert_result_equals(
         render(
             make_table(

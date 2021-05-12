@@ -68,30 +68,34 @@ def _render_difference(table, colname1, colname2, unit, outcolname):
     out_arrays = []
     if unit == "nanosecond":
         out_type = pa.int64()
+        out_metadata = {"format": "{:,d}"}
     else:
         out_type = pa.float64()
+        out_metadata = {"format": "{:,}"}
     num_chunks = table[colname1].num_chunks
     for chunk in range(num_chunks):
-        in_np_array1 = table[colname1].chunk(chunk).to_numpy(zero_copy_only=False)
-        in_np_array2 = table[colname2].chunk(chunk).to_numpy(zero_copy_only=False)
-        out_np_timedelta_array = in_np_array2 - in_np_array1
+        chunk1 = table[colname1].chunk(chunk).cast(pa.int64())
+        chunk2 = table[colname2].chunk(chunk).cast(pa.int64())
+        # TODO subtract_checked and report error
+        difference_in_ns = pa.compute.subtract(chunk2, chunk1)
+
         if unit == "nanosecond":
             # Nanosecond differences are integers
-            out_array = pa.array(
-                out_np_timedelta_array.astype("int"),
-                mask=np.isnat(out_np_timedelta_array),
-            )
+            out_array = difference_in_ns
         else:
-            out_array = pa.array(
-                out_np_timedelta_array.astype("float64") / _NS_PER_UNIT[unit],
-                mask=np.isnat(out_np_timedelta_array),
+            out_array = pa.compute.divide(
+                difference_in_ns.cast(pa.float64(), safe=False),
+                pa.scalar(_NS_PER_UNIT[unit], pa.float64()),
             )
         out_arrays.append(out_array)
 
     if outcolname in table.column_names:
         table = table.remove_column(table.column_names.index(outcolname))
 
-    table = table.append_column(outcolname, pa.chunked_array(out_arrays, out_type))
+    table = table.append_column(
+        pa.field(outcolname, out_type, metadata=out_metadata),
+        pa.chunked_array(out_arrays, out_type),
+    )
 
     return ArrowRenderResult(table)
 
