@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2021-05-05 15:30+0000\n"
+"POT-Creation-Date: 2021-05-12 19:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,13 +17,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.9.0\n"
+"Generated-By: Babel 2.9.1\n"
 
 msgid "_spec.name"
-msgstr "Timestamp Math"
+msgstr "Timestamp math"
 
 msgid "_spec.description"
-msgstr "Compare date & time columns to find difference, minimum or maximum."
+msgstr ""
+"Round down Timestamps, or compare values to find the difference, minimum "
+"or maximum."
 
 msgid "_spec.parameters.operation.name"
 msgstr "Operation"
@@ -94,7 +96,7 @@ msgstr "Microsecond"
 msgid "_spec.parameters.outcolname.name"
 msgstr "Output column name"
 
-#: timestampmath.py:171
+#: timestampmath.py:175
 msgid "warning.convertedOutOfBoundsToNull"
 msgstr "Converted timestamp {timestamp} to null because it is out of bounds."
 

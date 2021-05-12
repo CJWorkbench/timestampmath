@@ -1,8 +1,8 @@
-#. default-message: Timestamp Math
+#. default-message: Timestamp math
 msgid "_spec.name"
 msgstr ""
 
-#. default-message: Compare date & time columns to find difference, minimum or maximum.
+#. default-message: Round down Timestamps, or compare values to find the difference, minimum or maximum.
 msgid "_spec.description"
 msgstr ""
 
@@ -99,7 +99,7 @@ msgid "_spec.parameters.outcolname.name"
 msgstr ""
 
 #. default-message: Converted timestamp {timestamp} to null because it is out of bounds.
-#: timestampmath.py:171
+#: timestampmath.py:175
 msgid "warning.convertedOutOfBoundsToNull"
 msgstr ""
 
